@@ -9,14 +9,14 @@ import (
 )
 
 type ResponseMeeting struct {
-	MeetingID   int
-	MeetingName string
-	Applicant   string
-	Date        int
-	StartTime   int
-	EndTime     int
-	RoomID      int
-	RoomName    string
+	MeetingID   int    `json:"meeting_id"`
+	MeetingName string `json:"meeting_name"`
+	Applicant   string `json:"applicant"`
+	Date        int    `json:"date"`
+	StartTime   int    `json:"start_time"`
+	EndTime     int    `json:"end_time"`
+	RoomID      int    `json:"room_id"`
+	RoomName    string `json:"room_name"`
 }
 
 func (h *Handler) QueryAllocateByDate(c *gin.Context) {
@@ -60,17 +60,17 @@ func (h *Handler) QueryAllocateByRoom(c *gin.Context) {
 	// convert string to int
 	roomID, err := strconv.Atoi(roomIdStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "roomID convert to int error:" + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "roomID convert to int error: " + err.Error()})
 		return
 	}
 	from, err := strconv.Atoi(fromStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "<from> convert to int error:" + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "<from> convert to int error: " + err.Error()})
 		return
 	}
 	to, err := strconv.Atoi(toStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "<to> convert to int error:" + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "<to> convert to int error: " + err.Error()})
 		return
 	}
 

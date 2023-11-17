@@ -27,9 +27,17 @@ func main() {
 	r := gin.Default()
 
 	r.GET("/rooms", handler.GetRooms)
-	r.POST("/rooms", handler.CreateRoom)
+	r.POST("/room", handler.CreateRoom)
 	r.PUT("/room/:id", handler.UpdateRoom)
 	r.DELETE("/room/:id", handler.DeleteRoom)
+
+	r.POST("/allocate", handler.Allocate)
+	r.GET("/meetings/date/:date", handler.QueryAllocateByDate)
+	r.GET("/meetings/room/:id", handler.QueryAllocateByRoom)
+	r.GET("meeting/:id", handler.QueryMeeting)
+	r.GET("/svg/:date", handler.SVG)
+
+	r.DELETE("/meeting/:id", handler.DeleteMeeting)
 
 	r.Run(":8080")
 }

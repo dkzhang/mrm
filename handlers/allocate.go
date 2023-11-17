@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"mrm/ent"
 	"mrm/ent/room"
@@ -8,20 +9,20 @@ import (
 )
 
 type AllocateMeeting struct {
-	ID        int
-	Name      string
-	Applicant string
-	DateTimes []MeetingDateTime
+	ID        int               `json:"id"`
+	Name      string            `json:"name"`
+	Applicant string            `json:"applicant"`
+	DateTimes []MeetingDateTime `json:"date_times"`
 
-	IsMandatory bool // 是否强制分配
+	IsMandatory bool `json:"is_mandatory"` // 是否强制分配
 }
 
 type MeetingDateTime struct {
-	Date      int
-	StartTime int
-	EndTime   int
+	Date      int `json:"date"`
+	StartTime int `json:"start_time"`
+	EndTime   int `json:"end_time"`
 
-	RoomID int
+	RoomID int `json:"room_id"`
 }
 
 func (h *Handler) Allocate(c *gin.Context) {
@@ -64,6 +65,7 @@ func (h *Handler) Allocate(c *gin.Context) {
 
 	// create meeting.
 	meeting, err := tx.Meeting.Create().
+		SetID(am.ID).
 		SetName(am.Name).
 		SetApplicant(am.Applicant).
 		Save(c)
@@ -82,7 +84,7 @@ func (h *Handler) Allocate(c *gin.Context) {
 			SetRoomID(dt.RoomID).
 			Save(c)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Create MeetingDateRoom error: %s", err.Error())})
 			return
 		}
 	}
