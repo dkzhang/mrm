@@ -1,6 +1,9 @@
 package handlers
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestConvertTimeToInt(t *testing.T) {
 	if t2i(700) != 0 {
@@ -16,19 +19,28 @@ func TestConvertTimeToInt(t *testing.T) {
 	}
 }
 
-//#FF0000 - Red
-//#00FFFF - Aqua
-//#800080 - Purple
-//#FFFF00 - Yellow
-//#0000FF - Blue
-//#D2691E - Chocolate
-//#008000 - Green
-//#FF00FF - Fuchsia
-//#A52A2A - Brown
-//#FFA500 - Orange
-//#008080 - Teal
-//#6B8E23 - Olive Drab
-//#000000 - Black
-//#7FFFD4 - Aquamarine
-//#808000 - Olive
-//#800000 - Maroon
+func TestGenSvg(t *testing.T) {
+	rooms := make([]roomOccupiedArray, 3)
+	rooms[0] = roomOccupiedArray{1, "第一会议室",
+		[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0}}
+	rooms[1] = roomOccupiedArray{2, "第二会议室",
+		[]int{0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 5, 5, 0, 11, 11, 11}}
+	rooms[2] = roomOccupiedArray{3, "C206",
+		[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 21, 21, 0, 0, 0, 0, 0, 0, 0, 31, 31, 31, 31, 31}}
+
+	buffer := GenSvg(rooms)
+	//write to file
+	f, err := os.Create("test.svg")
+	if err != nil {
+		t.Errorf("create file error: %v", err)
+		return
+	}
+	defer f.Close()
+
+	n, err := f.WriteString(buffer.String())
+	if err != nil {
+		t.Errorf("write file error: %v", err)
+		return
+	}
+	t.Logf("write %d bytes\n", n)
+}
