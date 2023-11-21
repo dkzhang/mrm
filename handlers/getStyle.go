@@ -3,7 +3,15 @@ package handlers
 func getStyle() string {
 	return `
 <defs>
-	<style>		
+	<style>
+		.title{
+			font-family: 'Microsoft YaHei Black', sans-serif;
+    		font-size : 20px;
+    		text-anchor : middle;
+    		fill : black;
+    		font-weight : bold;
+			transform: translateY(0.4em);
+		}
 		.header{
    			fill : white;
     		stroke : black;

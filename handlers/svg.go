@@ -24,6 +24,7 @@ const (
 
 	tableSpacingX = 5
 	tableSpacingY = 5
+	titleHeight   = 50
 
 	tableWidth = rowHeaderWidth + cellWidth*Intervals + tableSpacingX*2
 
@@ -64,21 +65,25 @@ func (h *Handler) SVG(c *gin.Context) {
 		}
 	}
 
-	buffer := GenSvg(roomOccupiedArrays)
+	svgTitle := fmt.Sprintf("%d年%d月%d日会议室占用情况", meetingDate/10000, meetingDate%10000/100, meetingDate%100)
+	buffer := GenSvg(svgTitle, roomOccupiedArrays)
 	c.Data(http.StatusOK, "image/svg+xml", buffer.Bytes())
 }
 
-func GenSvg(rooms []roomOccupiedArray) *bytes.Buffer {
-	tableHeight := colHeaderHeight + cellHeight*len(rooms) + tableSpacingY*2
+func GenSvg(svgTitle string, rooms []roomOccupiedArray) *bytes.Buffer {
+	tableHeight := titleHeight + colHeaderHeight + cellHeight*len(rooms) + tableSpacingY*2
 
 	buffer := bytes.NewBufferString(fmt.Sprintf(SVG_HEAD, tableWidth, tableHeight, tableWidth, tableHeight))
 
 	// Style
 	buffer.WriteString(getStyle())
 
+	// Title
+	buffer.WriteString(fmt.Sprintf(`<text x="%d" y="%d" class="title">%s</text>`+"\n", tableWidth/2, titleHeight/2, svgTitle))
+
 	// Col Header
 	currentX := rowHeaderWidth + tableSpacingX
-	currentY := tableSpacingY
+	currentY := titleHeight + tableSpacingY
 	for i := 0; i < Intervals/IntervalsPerHour; i++ {
 		buffer.WriteString(fmt.Sprintf(`<rect x="%d" y="%d" width="%d" height="%d" class="header col-header" />`+"\n",
 			currentX+colHeaderWidth*i, currentY,
@@ -89,7 +94,7 @@ func GenSvg(rooms []roomOccupiedArray) *bytes.Buffer {
 
 	// Row Header
 	currentX = tableSpacingX
-	currentY = colHeaderHeight + tableSpacingY
+	currentY = titleHeight + colHeaderHeight + tableSpacingY
 
 	for i, room := range rooms {
 		buffer.WriteString(fmt.Sprintf(`<rect x="%d" y="%d" width="%d" height="%d" class="header row-header" />`+"\n",
@@ -101,7 +106,7 @@ func GenSvg(rooms []roomOccupiedArray) *bytes.Buffer {
 
 	// cells
 	currentX = rowHeaderWidth + tableSpacingX
-	currentY = colHeaderHeight + tableSpacingY
+	currentY = titleHeight + colHeaderHeight + tableSpacingY
 	currentMeetingID := 0
 	currentColorIndex := 0
 	for i, room := range rooms {

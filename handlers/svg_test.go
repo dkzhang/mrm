@@ -28,7 +28,7 @@ func TestGenSvg(t *testing.T) {
 	rooms[2] = roomOccupiedArray{3, "C206",
 		[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 21, 21, 0, 0, 0, 0, 0, 0, 0, 31, 31, 31, 31, 31}}
 
-	buffer := GenSvg(rooms)
+	buffer := GenSvg("2023年11月21日会议室占用情况", rooms)
 	//write to file
 	f, err := os.Create("test.svg")
 	if err != nil {
