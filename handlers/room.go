@@ -3,12 +3,17 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"mrm/ent"
+	"mrm/ent/room"
 	"net/http"
 	"strconv"
 )
 
 func (h *Handler) GetRooms(c *gin.Context) {
-	rooms := h.DbClient.Room.Query().AllX(c)
+	rooms, err := h.DbClient.Room.Query().Order(ent.Asc(room.FieldID)).All(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, rooms)
 }
 
