@@ -31,6 +31,7 @@ func (h *Handler) CreateRoom(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		room.ID++
 	}
 
 	newRoom, err := h.DbClient.Room.Create().
