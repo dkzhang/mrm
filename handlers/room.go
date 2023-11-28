@@ -18,6 +18,16 @@ func (h *Handler) CreateRoom(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	if room.ID == 0 {
+		var err error
+		room.ID, err = h.DbClient.Room.Query().Aggregate(ent.Max("id")).Int(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
 	newRoom, err := h.DbClient.Room.Create().
 		SetID(room.ID).
 		SetName(room.Name).
