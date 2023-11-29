@@ -10,6 +10,9 @@ WORKDIR /app
 # Install git.
 RUN apt-get update && apt-get install -y git
 
+# Set the build date
+RUN echo "Build: $(date)"
+
 # Clone the repository
 RUN git clone https://github.com/dkzhang/mrm.git . #20231129-1720
 
