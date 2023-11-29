@@ -69,33 +69,34 @@ func (h *Handler) DeleteMeeting(c *gin.Context) {
 		return
 	}
 
+	code, obj := h.deleteMeeting(meetingId, c)
+	c.JSON(code, obj)
+	return
+}
+
+func (h *Handler) deleteMeeting(meetingId int, c *gin.Context) (code int, obj any) {
 	// Delete Meeting and MeetingDateRoom
 	tx, err := h.DbClient.Tx(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Tx error: %s", err.Error())}
 	}
 
 	// delete meetingDateRoom
 	_, err = tx.MeetingDateRoom.Delete().Where(meetingdateroom.HasMeetingWith(meeting.ID(meetingId))).Exec(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Delete meetingDateRoom error: %v", err)})
-		return
+		return http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Delete meetingDateRoom error: %v", err)}
 	}
 
 	// delete meeting
 	_, err = tx.Meeting.Delete().Where(meeting.ID(meetingId)).Exec(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Delete meeting error: %v", err)})
-		return
+		return http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Delete meeting error: %v", err)}
 	}
 
 	// commit
 	err = tx.Commit()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Commit error: %v", err)})
-		return
+		return http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Commit error: %v", err)}
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Delete success"})
+	return http.StatusOK, gin.H{"message": "Delete success"}
 }

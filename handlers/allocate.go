@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mrm/ent"
+	"mrm/ent/meeting"
 	"mrm/ent/room"
 	"net/http"
 )
@@ -34,6 +35,24 @@ func (h *Handler) Allocate(c *gin.Context) {
 	}
 
 	// Check DateTimes []MeetingDateTime is valid
+
+	// removing meeting if exists.
+	_, err := h.DbClient.Meeting.Query().Where(meeting.ID(am.ID)).Only(c)
+	if err == nil {
+		// meeting exists, remove it.
+		code, obj := h.deleteMeeting(am.ID, c)
+		if code != http.StatusOK {
+			c.JSON(code, obj)
+			return
+		}
+	} else {
+		// check if error is not found.
+		if !ent.IsNotFound(err) {
+			c.JSON(http.StatusInternalServerError,
+				gin.H{"error": fmt.Sprintf("query Meeting error: %s", err.Error())})
+			return
+		}
+	}
 
 	// DateTime conflict detection
 	var conflictedMdrs []*ent.MeetingDateRoom
