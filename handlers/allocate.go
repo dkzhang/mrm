@@ -42,6 +42,7 @@ func (h *Handler) Allocate(c *gin.Context) {
 	if err := c.ShouldBindJSON(&am); err != nil {
 		code = http.StatusBadRequest
 		message = fmt.Sprintf("Bind JSON error: %s", err.Error())
+		c.JSON(http.StatusOK, RespA{Code: code, Message: message})
 		return
 	}
 
@@ -52,17 +53,20 @@ func (h *Handler) Allocate(c *gin.Context) {
 		if err != nil {
 			code = http.StatusBadRequest
 			message = fmt.Sprintf("MeetingDateTime Date is not in YYYYMMDD integer format")
+			c.JSON(http.StatusOK, RespA{Code: code, Message: message})
 			return
 		}
 
 		if dt.StartTime >= dt.EndTime {
 			code = http.StatusBadRequest
 			message = fmt.Sprintf("MeetingDateTime StartTime >= EndTime")
+			c.JSON(http.StatusOK, RespA{Code: code, Message: message})
 			return
 		}
 		if dt.StartTime < 0 || dt.StartTime > 2400 || dt.EndTime < 0 || dt.EndTime > 2400 {
 			code = http.StatusBadRequest
 			message = fmt.Sprintf("MeetingDateTime StartTime or EndTime is not in [0, 2400]")
+			c.JSON(http.StatusOK, RespA{Code: code, Message: message})
 			return
 		}
 	}
@@ -72,6 +76,7 @@ func (h *Handler) Allocate(c *gin.Context) {
 	if err != nil {
 		code = http.StatusInternalServerError
 		message = fmt.Sprintf("Tx error: %s", err.Error())
+		c.JSON(http.StatusOK, RespA{Code: code, Message: message})
 		return
 	}
 
