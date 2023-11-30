@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 	"log"
 	"mrm/ent"
 	"mrm/handlers"
 	"os"
-
-	_ "github.com/lib/pq"
+	"time"
 )
 
 func main() {
@@ -18,11 +18,25 @@ func main() {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbDatabase := os.Getenv("DB_NAME")
 
-	client, err := ent.Open("postgres",
-		fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbUser, dbPassword, dbDatabase))
-	//"host=192.168.128.27 port=5432 user=postgres dbname=mydatabase password=mysecretpassword sslmode=disable")
-	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
+	// try to open database 3 times
+	var client *ent.Client
+	var err error
+	count := 0
+	for {
+		client, err = ent.Open("postgres",
+			fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbUser, dbPassword, dbDatabase))
+		//"host=192.168.128.27 port=5432 user=postgres dbname=mydatabase password=mysecretpassword sslmode=disable")
+		if err != nil {
+			if count >= 3 {
+				log.Fatalf("failed opening connection to postgres after 3 times try: %v", err)
+			} else {
+				count += 1
+				log.Printf("failed opening connection to postgres, trying %d", count)
+				time.Sleep(time.Second * 3)
+			}
+		} else {
+			break
+		}
 	}
 	defer client.Close()
 
