@@ -19,24 +19,24 @@ func main() {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbDatabase := os.Getenv("DB_NAME")
 
-	producerConfig := tencentCls.GetDefaultAsyncProducerClientConfig()
-	producerConfig.Endpoint = "ap-guangzhou.cls.tencentcs.com"
-	producerConfig.AccessKeyID = ""
-	producerConfig.AccessKeySecret = ""
-
-	producerInstance, err := tencentCls.NewAsyncProducerClient(producerConfig)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	// 异步发送程序，需要启动
-	producerInstance.Start()
-	defer producerInstance.Close(60000)
+	//producerConfig := tencentCls.GetDefaultAsyncProducerClientConfig()
+	//producerConfig.Endpoint = "ap-guangzhou.cls.tencentcs.com"
+	//producerConfig.AccessKeyID = ""
+	//producerConfig.AccessKeySecret = ""
+	//
+	//producerInstance, err := tencentCls.NewAsyncProducerClient(producerConfig)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//
+	//// 异步发送程序，需要启动
+	//producerInstance.Start()
+	//defer producerInstance.Close(60000)
 
 	// try to open database 3 times
 	var client *ent.Client
-	//var err error
+	var err error
 	count := 0
 	for {
 		client, err = ent.Open("postgres",
@@ -85,6 +85,12 @@ type LogInstance struct {
 	producerInstance *tencentCls.AsyncProducerClient
 	TopicId          string
 }
+
+//func (logInstance *LogInstance) SendLog(messages map[string]string) error {
+//	log := tencentCls.NewCLSLog(time.Now().Unix(), messages)
+//
+//	return logInstance.producerInstance.SendLog(logInstance.TopicId, log, callback)
+//}
 
 type Callback struct {
 }
