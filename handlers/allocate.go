@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+type RespA struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 type AllocateMeeting struct {
 	ID        int64             `json:"id"`
 	Name      string            `json:"name"`
@@ -32,7 +37,10 @@ func (h *Handler) Allocate(c *gin.Context) {
 	am := AllocateMeeting{}
 
 	if err := c.ShouldBindJSON(&am); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusOK, RespA{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("Bind JSON error: %s", err.Error()),
+		})
 		return
 	}
 
@@ -41,16 +49,25 @@ func (h *Handler) Allocate(c *gin.Context) {
 		dateStr := fmt.Sprintf("%d", dt.Date)
 		_, err := time.Parse("20060102", dateStr)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "MeetingDateTime Date is not in YYYYMMDD integer format"})
+			c.JSON(http.StatusOK, RespA{
+				Code:    http.StatusBadRequest,
+				Message: fmt.Sprintf("MeetingDateTime Date is not in YYYYMMDD integer format"),
+			})
 			return
 		}
 
 		if dt.StartTime >= dt.EndTime {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "MeetingDateTime StartTime >= EndTime"})
+			c.JSON(http.StatusOK, RespA{
+				Code:    http.StatusBadRequest,
+				Message: fmt.Sprintf("MeetingDateTime StartTime >= EndTime"),
+			})
 			return
 		}
 		if dt.StartTime < 0 || dt.StartTime > 2400 || dt.EndTime < 0 || dt.EndTime > 2400 {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "MeetingDateTime StartTime or EndTime is not in [0, 2400]"})
+			c.JSON(http.StatusOK, RespA{
+				Code:    http.StatusBadRequest,
+				Message: fmt.Sprintf("MeetingDateTime StartTime or EndTime is not in [0, 2400]"),
+			})
 			return
 		}
 	}
@@ -58,14 +75,21 @@ func (h *Handler) Allocate(c *gin.Context) {
 	// create tx
 	tx, err := h.DbClient.Tx(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Tx error: %s", err.Error())})
+		c.JSON(http.StatusOK, RespA{
+			Code:    http.StatusInternalServerError,
+			Message: fmt.Sprintf("Tx error: %s", err.Error()),
+		})
+		return
 	}
 
 	// check meeting exists
 	_, err = tx.Meeting.Query().Where(meeting.ID(am.ID)).Only(c)
 	if err != nil {
 		if !ent.IsNotFound(err) {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Query meeting error: %v", err)})
+			c.JSON(http.StatusOK, RespA{
+				Code:    http.StatusInternalServerError,
+				Message: fmt.Sprintf("Query meeting error: %s", err.Error()),
+			})
 			return
 		}
 	} else {
@@ -73,13 +97,21 @@ func (h *Handler) Allocate(c *gin.Context) {
 		// delete meetingDateRoom
 		_, err = tx.MeetingDateRoom.Delete().Where(meetingdateroom.HasMeetingWith(meeting.ID(am.ID))).Exec(c)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Delete meetingDateRoom error: %v", err)})
+			c.JSON(http.StatusOK, RespA{
+				Code:    http.StatusInternalServerError,
+				Message: fmt.Sprintf("Delete meetingDateRoom error: %v", err),
+			})
+			return
 		}
 
 		// delete meeting
 		_, err = tx.Meeting.Delete().Where(meeting.ID(am.ID)).Exec(c)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Delete meeting error: %v", err)})
+			c.JSON(http.StatusOK, RespA{
+				Code:    http.StatusInternalServerError,
+				Message: fmt.Sprintf("Delete meeting error: %v", err),
+			})
+			return
 		}
 	}
 
@@ -92,7 +124,10 @@ func (h *Handler) Allocate(c *gin.Context) {
 		mdrs, err := tx.Room.Query().Where(room.ID(dt.RoomID)).
 			QueryMdrs().All(c)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Query mdrs error: %s", err.Error())})
+			c.JSON(http.StatusOK, RespA{
+				Code:    http.StatusInternalServerError,
+				Message: fmt.Sprintf("Query mdrs error: %s", err.Error()),
+			})
 			return
 		}
 
@@ -100,7 +135,10 @@ func (h *Handler) Allocate(c *gin.Context) {
 			// continue if in the same meeting.
 			m, err := mdr.QueryMeeting().Only(c)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Query meeting ID from mdr error: %s", err.Error())})
+				c.JSON(http.StatusOK, RespA{
+					Code:    http.StatusInternalServerError,
+					Message: fmt.Sprintf("Query meeting ID from mdr error: %s", err.Error()),
+				})
 				return
 			}
 			if m.ID == am.ID {
@@ -111,7 +149,10 @@ func (h *Handler) Allocate(c *gin.Context) {
 				if am.IsMandatory {
 					conflictedMdrs = append(conflictedMdrs, mdr)
 				} else {
-					c.JSON(http.StatusConflict, gin.H{"message": "Meeting DateTime Conflict"})
+					c.JSON(http.StatusOK, RespA{
+						Code:    http.StatusConflict,
+						Message: fmt.Sprintf("Meeting DateTime Conflict"),
+					})
 					return
 				}
 			}
@@ -125,7 +166,10 @@ func (h *Handler) Allocate(c *gin.Context) {
 		SetApplicant(am.Applicant).
 		Save(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.JSON(http.StatusOK, RespA{
+			Code:    http.StatusInternalServerError,
+			Message: fmt.Sprintf("Create meeting error: %s", err.Error()),
+		})
 		return
 	}
 
@@ -139,7 +183,10 @@ func (h *Handler) Allocate(c *gin.Context) {
 			SetRoomID(dt.RoomID).
 			Save(c)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Create MeetingDateRoom error: %s", err.Error())})
+			c.JSON(http.StatusOK, RespA{
+				Code:    http.StatusInternalServerError,
+				Message: fmt.Sprintf("Create meetingDateRoom error: %s", err.Error()),
+			})
 			return
 		}
 	}
@@ -149,7 +196,10 @@ func (h *Handler) Allocate(c *gin.Context) {
 		for _, mdr := range conflictedMdrs {
 			err := tx.MeetingDateRoom.DeleteOne(mdr).Exec(c)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+				c.JSON(http.StatusOK, RespA{
+					Code:    http.StatusInternalServerError,
+					Message: fmt.Sprintf("Delete conflicted meetingDateRoom error: %s", err.Error()),
+				})
 				return
 			}
 		}
@@ -157,10 +207,17 @@ func (h *Handler) Allocate(c *gin.Context) {
 
 	// commit the transaction.
 	if err := tx.Commit(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.JSON(http.StatusOK, RespA{
+			Code:    http.StatusInternalServerError,
+			Message: fmt.Sprintf("Commit error: %s", err.Error()),
+		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Allocate success"})
+	c.JSON(http.StatusOK, RespA{
+		Code:    http.StatusOK,
+		Message: fmt.Sprintf("Allocate success"),
+	})
+	return
 }
 
 func IsConflict(a *MeetingDateTime, b *ent.MeetingDateRoom) bool {
