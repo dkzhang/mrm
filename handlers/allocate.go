@@ -89,7 +89,7 @@ func (h *Handler) Allocate(c *gin.Context) {
 	// DateTime conflict detection
 	var conflictedMdrs []*ent.MeetingDateRoom
 	for _, dt := range am.DateTimes {
-		mdrs, err := h.DbClient.Room.Query().Where(room.ID(dt.RoomID)).QueryMdrs().All(c)
+		mdrs, err := tx.Room.Query().Where(room.ID(dt.RoomID)).QueryMdrs().All(c)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Query mdrs error: %s", err.Error())})
 			return
