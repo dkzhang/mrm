@@ -10,11 +10,8 @@ WORKDIR /app
 # Install git.
 RUN apt-get update && apt-get install -y git
 
-# Set the build date
-RUN echo "Build: $(date)"
-
 # Clone the repository
-RUN git clone https://github.com/dkzhang/mrm.git . #20231129-1720
+RUN git clone https://github.com/dkzhang/mrm.git . #20231130-0903
 
 # Download all dependencies. Dependencies will be cached if the go.mod and the go.sum files are not changed
 RUN go mod download
