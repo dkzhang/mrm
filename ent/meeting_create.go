@@ -33,7 +33,7 @@ func (mc *MeetingCreate) SetApplicant(s string) *MeetingCreate {
 }
 
 // SetID sets the "id" field.
-func (mc *MeetingCreate) SetID(i int) *MeetingCreate {
+func (mc *MeetingCreate) SetID(i int64) *MeetingCreate {
 	mc.mutation.SetID(i)
 	return mc
 }
@@ -109,7 +109,7 @@ func (mc *MeetingCreate) sqlSave(ctx context.Context) (*Meeting, error) {
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = int(id)
+		_node.ID = int64(id)
 	}
 	mc.mutation.id = &_node.ID
 	mc.mutation.done = true
@@ -119,7 +119,7 @@ func (mc *MeetingCreate) sqlSave(ctx context.Context) (*Meeting, error) {
 func (mc *MeetingCreate) createSpec() (*Meeting, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Meeting{config: mc.config}
-		_spec = sqlgraph.NewCreateSpec(meeting.Table, sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(meeting.Table, sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt64))
 	)
 	if id, ok := mc.mutation.ID(); ok {
 		_node.ID = id
@@ -198,7 +198,7 @@ func (mcb *MeetingCreateBulk) Save(ctx context.Context) ([]*Meeting, error) {
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil

@@ -54,7 +54,7 @@ func (h *Handler) SVG(c *gin.Context) {
 	for i, room := range rooms {
 		roomOccupiedArrays[i].roomID = room.ID
 		roomOccupiedArrays[i].roomName = room.Name
-		roomOccupiedArrays[i].Occupied = make([]int, Intervals)
+		roomOccupiedArrays[i].Occupied = make([]int64, Intervals)
 	}
 
 	for _, mdr := range mdrs {
@@ -107,7 +107,7 @@ func GenSvg(svgTitle string, rooms []roomOccupiedArray) *bytes.Buffer {
 	// cells
 	currentX = rowHeaderWidth + tableSpacingX
 	currentY = titleHeight + colHeaderHeight + tableSpacingY
-	currentMeetingID := 0
+	currentMeetingID := int64(0)
 	currentColorIndex := 0
 	for i, room := range rooms {
 		for j := 0; j < Intervals; j++ {
@@ -137,7 +137,7 @@ func GenSvg(svgTitle string, rooms []roomOccupiedArray) *bytes.Buffer {
 type roomOccupiedArray struct {
 	roomID   int
 	roomName string
-	Occupied []int
+	Occupied []int64
 }
 
 func t2i(t int) int {
@@ -145,16 +145,16 @@ func t2i(t int) int {
 	return t/100*2 + t%100/30 - 7*2
 }
 
-func t2t(from int, to int, id int) []int {
-	array := make([]int, Intervals)
+func t2t(from int, to int, id int64) []int64 {
+	array := make([]int64, Intervals)
 	for i := t2i(from); i < t2i(to); i++ {
 		array[i] = id
 	}
 	return array
 }
 
-func mergeArray(a []int, b []int) []int {
-	array := make([]int, Intervals)
+func mergeArray(a []int64, b []int64) []int64 {
+	array := make([]int64, Intervals)
 	for i := 0; i < len(a); i++ {
 		if a[i] == 0 {
 			array[i] = b[i]

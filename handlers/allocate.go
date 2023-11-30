@@ -12,7 +12,7 @@ import (
 )
 
 type AllocateMeeting struct {
-	ID        int               `json:"id"`
+	ID        int64             `json:"id"`
 	Name      string            `json:"name"`
 	Applicant string            `json:"applicant"`
 	DateTimes []MeetingDateTime `json:"date_times"`

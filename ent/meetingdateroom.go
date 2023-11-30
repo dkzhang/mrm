@@ -27,7 +27,7 @@ type MeetingDateRoom struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MeetingDateRoomQuery when eager-loading is set.
 	Edges        MeetingDateRoomEdges `json:"edges"`
-	meeting_mdrs *int
+	meeting_mdrs *int64
 	room_mdrs    *int
 	selectValues sql.SelectValues
 }
@@ -123,8 +123,8 @@ func (mdr *MeetingDateRoom) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field meeting_mdrs", value)
 			} else if value.Valid {
-				mdr.meeting_mdrs = new(int)
-				*mdr.meeting_mdrs = int(value.Int64)
+				mdr.meeting_mdrs = new(int64)
+				*mdr.meeting_mdrs = int64(value.Int64)
 			}
 		case meetingdateroom.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {

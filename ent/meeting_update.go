@@ -125,7 +125,7 @@ func (mu *MeetingUpdate) ExecX(ctx context.Context) {
 }
 
 func (mu *MeetingUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(meeting.Table, meeting.Columns, sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(meeting.Table, meeting.Columns, sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt64))
 	if ps := mu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -314,7 +314,7 @@ func (muo *MeetingUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (muo *MeetingUpdateOne) sqlSave(ctx context.Context) (_node *Meeting, err error) {
-	_spec := sqlgraph.NewUpdateSpec(meeting.Table, meeting.Columns, sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(meeting.Table, meeting.Columns, sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt64))
 	id, ok := muo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Meeting.id" for update`)}

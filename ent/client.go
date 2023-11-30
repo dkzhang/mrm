@@ -279,7 +279,7 @@ func (c *MeetingClient) UpdateOne(m *Meeting) *MeetingUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *MeetingClient) UpdateOneID(id int) *MeetingUpdateOne {
+func (c *MeetingClient) UpdateOneID(id int64) *MeetingUpdateOne {
 	mutation := newMeetingMutation(c.config, OpUpdateOne, withMeetingID(id))
 	return &MeetingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -296,7 +296,7 @@ func (c *MeetingClient) DeleteOne(m *Meeting) *MeetingDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *MeetingClient) DeleteOneID(id int) *MeetingDeleteOne {
+func (c *MeetingClient) DeleteOneID(id int64) *MeetingDeleteOne {
 	builder := c.Delete().Where(meeting.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -313,12 +313,12 @@ func (c *MeetingClient) Query() *MeetingQuery {
 }
 
 // Get returns a Meeting entity by its id.
-func (c *MeetingClient) Get(ctx context.Context, id int) (*Meeting, error) {
+func (c *MeetingClient) Get(ctx context.Context, id int64) (*Meeting, error) {
 	return c.Query().Where(meeting.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *MeetingClient) GetX(ctx context.Context, id int) *Meeting {
+func (c *MeetingClient) GetX(ctx context.Context, id int64) *Meeting {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

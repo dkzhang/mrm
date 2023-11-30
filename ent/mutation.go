@@ -35,7 +35,7 @@ type MeetingMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *int
+	id            *int64
 	name          *string
 	applicant     *string
 	clearedFields map[string]struct{}
@@ -67,7 +67,7 @@ func newMeetingMutation(c config, op Op, opts ...meetingOption) *MeetingMutation
 }
 
 // withMeetingID sets the ID field of the mutation.
-func withMeetingID(id int) meetingOption {
+func withMeetingID(id int64) meetingOption {
 	return func(m *MeetingMutation) {
 		var (
 			err   error
@@ -119,13 +119,13 @@ func (m MeetingMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Meeting entities.
-func (m *MeetingMutation) SetID(id int) {
+func (m *MeetingMutation) SetID(id int64) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *MeetingMutation) ID() (id int, exists bool) {
+func (m *MeetingMutation) ID() (id int64, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -136,12 +136,12 @@ func (m *MeetingMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *MeetingMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *MeetingMutation) IDs(ctx context.Context) ([]int64, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []int64{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -522,7 +522,7 @@ type MeetingDateRoomMutation struct {
 	end_time       *int
 	addend_time    *int
 	clearedFields  map[string]struct{}
-	meeting        *int
+	meeting        *int64
 	clearedmeeting bool
 	room           *int
 	clearedroom    bool
@@ -798,7 +798,7 @@ func (m *MeetingDateRoomMutation) ResetEndTime() {
 }
 
 // SetMeetingID sets the "meeting" edge to the Meeting entity by id.
-func (m *MeetingDateRoomMutation) SetMeetingID(id int) {
+func (m *MeetingDateRoomMutation) SetMeetingID(id int64) {
 	m.meeting = &id
 }
 
@@ -813,7 +813,7 @@ func (m *MeetingDateRoomMutation) MeetingCleared() bool {
 }
 
 // MeetingID returns the "meeting" edge ID in the mutation.
-func (m *MeetingDateRoomMutation) MeetingID() (id int, exists bool) {
+func (m *MeetingDateRoomMutation) MeetingID() (id int64, exists bool) {
 	if m.meeting != nil {
 		return *m.meeting, true
 	}
@@ -823,7 +823,7 @@ func (m *MeetingDateRoomMutation) MeetingID() (id int, exists bool) {
 // MeetingIDs returns the "meeting" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // MeetingID instead. It exists only for internal usage by the builders.
-func (m *MeetingDateRoomMutation) MeetingIDs() (ids []int) {
+func (m *MeetingDateRoomMutation) MeetingIDs() (ids []int64) {
 	if id := m.meeting; id != nil {
 		ids = append(ids, *id)
 	}

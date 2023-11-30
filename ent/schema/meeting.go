@@ -14,9 +14,9 @@ type Meeting struct {
 // Fields of the Meeting.
 func (Meeting) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").Unique(),  // 会议ID
-		field.String("name"),      // 会议名称
-		field.String("applicant"), // 申请人
+		field.Int64("id").Unique(), // 会议ID
+		field.String("name"),       // 会议名称
+		field.String("applicant"),  // 申请人
 	}
 }
 

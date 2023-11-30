@@ -9,7 +9,7 @@ import (
 )
 
 type ResponseMeeting struct {
-	MeetingID   int    `json:"meeting_id"`
+	MeetingID   int64  `json:"meeting_id"`
 	MeetingName string `json:"meeting_name"`
 	Applicant   string `json:"applicant"`
 	Date        int    `json:"date"`

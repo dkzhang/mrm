@@ -93,13 +93,13 @@ func (mdru *MeetingDateRoomUpdate) AddEndTime(i int) *MeetingDateRoomUpdate {
 }
 
 // SetMeetingID sets the "meeting" edge to the Meeting entity by ID.
-func (mdru *MeetingDateRoomUpdate) SetMeetingID(id int) *MeetingDateRoomUpdate {
+func (mdru *MeetingDateRoomUpdate) SetMeetingID(id int64) *MeetingDateRoomUpdate {
 	mdru.mutation.SetMeetingID(id)
 	return mdru
 }
 
 // SetNillableMeetingID sets the "meeting" edge to the Meeting entity by ID if the given value is not nil.
-func (mdru *MeetingDateRoomUpdate) SetNillableMeetingID(id *int) *MeetingDateRoomUpdate {
+func (mdru *MeetingDateRoomUpdate) SetNillableMeetingID(id *int64) *MeetingDateRoomUpdate {
 	if id != nil {
 		mdru = mdru.SetMeetingID(*id)
 	}
@@ -209,7 +209,7 @@ func (mdru *MeetingDateRoomUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{meetingdateroom.MeetingColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -222,7 +222,7 @@ func (mdru *MeetingDateRoomUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{meetingdateroom.MeetingColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -343,13 +343,13 @@ func (mdruo *MeetingDateRoomUpdateOne) AddEndTime(i int) *MeetingDateRoomUpdateO
 }
 
 // SetMeetingID sets the "meeting" edge to the Meeting entity by ID.
-func (mdruo *MeetingDateRoomUpdateOne) SetMeetingID(id int) *MeetingDateRoomUpdateOne {
+func (mdruo *MeetingDateRoomUpdateOne) SetMeetingID(id int64) *MeetingDateRoomUpdateOne {
 	mdruo.mutation.SetMeetingID(id)
 	return mdruo
 }
 
 // SetNillableMeetingID sets the "meeting" edge to the Meeting entity by ID if the given value is not nil.
-func (mdruo *MeetingDateRoomUpdateOne) SetNillableMeetingID(id *int) *MeetingDateRoomUpdateOne {
+func (mdruo *MeetingDateRoomUpdateOne) SetNillableMeetingID(id *int64) *MeetingDateRoomUpdateOne {
 	if id != nil {
 		mdruo = mdruo.SetMeetingID(*id)
 	}
@@ -489,7 +489,7 @@ func (mdruo *MeetingDateRoomUpdateOne) sqlSave(ctx context.Context) (_node *Meet
 			Columns: []string{meetingdateroom.MeetingColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -502,7 +502,7 @@ func (mdruo *MeetingDateRoomUpdateOne) sqlSave(ctx context.Context) (_node *Meet
 			Columns: []string{meetingdateroom.MeetingColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

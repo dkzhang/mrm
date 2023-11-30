@@ -106,8 +106,8 @@ func (mq *MeetingQuery) FirstX(ctx context.Context) *Meeting {
 
 // FirstID returns the first Meeting ID from the query.
 // Returns a *NotFoundError when no Meeting ID was found.
-func (mq *MeetingQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (mq *MeetingQuery) FirstID(ctx context.Context) (id int64, err error) {
+	var ids []int64
 	if ids, err = mq.Limit(1).IDs(setContextOp(ctx, mq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -119,7 +119,7 @@ func (mq *MeetingQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (mq *MeetingQuery) FirstIDX(ctx context.Context) int {
+func (mq *MeetingQuery) FirstIDX(ctx context.Context) int64 {
 	id, err := mq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -157,8 +157,8 @@ func (mq *MeetingQuery) OnlyX(ctx context.Context) *Meeting {
 // OnlyID is like Only, but returns the only Meeting ID in the query.
 // Returns a *NotSingularError when more than one Meeting ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (mq *MeetingQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (mq *MeetingQuery) OnlyID(ctx context.Context) (id int64, err error) {
+	var ids []int64
 	if ids, err = mq.Limit(2).IDs(setContextOp(ctx, mq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -174,7 +174,7 @@ func (mq *MeetingQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (mq *MeetingQuery) OnlyIDX(ctx context.Context) int {
+func (mq *MeetingQuery) OnlyIDX(ctx context.Context) int64 {
 	id, err := mq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -202,7 +202,7 @@ func (mq *MeetingQuery) AllX(ctx context.Context) []*Meeting {
 }
 
 // IDs executes the query and returns a list of Meeting IDs.
-func (mq *MeetingQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (mq *MeetingQuery) IDs(ctx context.Context) (ids []int64, err error) {
 	if mq.ctx.Unique == nil && mq.path != nil {
 		mq.Unique(true)
 	}
@@ -214,7 +214,7 @@ func (mq *MeetingQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (mq *MeetingQuery) IDsX(ctx context.Context) []int {
+func (mq *MeetingQuery) IDsX(ctx context.Context) []int64 {
 	ids, err := mq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -404,7 +404,7 @@ func (mq *MeetingQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Meet
 
 func (mq *MeetingQuery) loadMdrs(ctx context.Context, query *MeetingDateRoomQuery, nodes []*Meeting, init func(*Meeting), assign func(*Meeting, *MeetingDateRoom)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Meeting)
+	nodeids := make(map[int64]*Meeting)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -444,7 +444,7 @@ func (mq *MeetingQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (mq *MeetingQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(meeting.Table, meeting.Columns, sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(meeting.Table, meeting.Columns, sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt64))
 	_spec.From = mq.sql
 	if unique := mq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

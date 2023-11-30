@@ -10,7 +10,7 @@ import (
 )
 
 type ResponseMeetingEx struct {
-	MeetingID   int    `json:"meeting_id"`
+	MeetingID   int64  `json:"meeting_id"`
 	MeetingName string `json:"meeting_name"`
 	Applicant   string `json:"applicant"`
 
@@ -28,7 +28,7 @@ type ResponseMeetingDateTime struct {
 
 func (h *Handler) QueryMeeting(c *gin.Context) {
 	meetingIdStr := c.Param("id")
-	meetingId, err := strconv.Atoi(meetingIdStr)
+	meetingId, err := strconv.ParseInt(meetingIdStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "MeetingID convert to int error: " + err.Error()})
 		return
@@ -63,7 +63,7 @@ func (h *Handler) QueryMeeting(c *gin.Context) {
 
 func (h *Handler) DeleteMeeting(c *gin.Context) {
 	meetingIdStr := c.Param("id")
-	meetingId, err := strconv.Atoi(meetingIdStr)
+	meetingId, err := strconv.ParseInt(meetingIdStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "MeetingID convert to int error: " + err.Error()})
 		return
@@ -74,7 +74,7 @@ func (h *Handler) DeleteMeeting(c *gin.Context) {
 	return
 }
 
-func (h *Handler) deleteMeeting(meetingId int, c *gin.Context) (code int, obj any) {
+func (h *Handler) deleteMeeting(meetingId int64, c *gin.Context) (code int, obj any) {
 	// Delete Meeting and MeetingDateRoom
 	tx, err := h.DbClient.Tx(c)
 	if err != nil {

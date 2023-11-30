@@ -40,13 +40,13 @@ func (mdrc *MeetingDateRoomCreate) SetEndTime(i int) *MeetingDateRoomCreate {
 }
 
 // SetMeetingID sets the "meeting" edge to the Meeting entity by ID.
-func (mdrc *MeetingDateRoomCreate) SetMeetingID(id int) *MeetingDateRoomCreate {
+func (mdrc *MeetingDateRoomCreate) SetMeetingID(id int64) *MeetingDateRoomCreate {
 	mdrc.mutation.SetMeetingID(id)
 	return mdrc
 }
 
 // SetNillableMeetingID sets the "meeting" edge to the Meeting entity by ID if the given value is not nil.
-func (mdrc *MeetingDateRoomCreate) SetNillableMeetingID(id *int) *MeetingDateRoomCreate {
+func (mdrc *MeetingDateRoomCreate) SetNillableMeetingID(id *int64) *MeetingDateRoomCreate {
 	if id != nil {
 		mdrc = mdrc.SetMeetingID(*id)
 	}
@@ -166,7 +166,7 @@ func (mdrc *MeetingDateRoomCreate) createSpec() (*MeetingDateRoom, *sqlgraph.Cre
 			Columns: []string{meetingdateroom.MeetingColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(meeting.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

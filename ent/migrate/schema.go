@@ -10,7 +10,7 @@ import (
 var (
 	// MeetingsColumns holds the columns for the "meetings" table.
 	MeetingsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "applicant", Type: field.TypeString},
 	}
@@ -26,7 +26,7 @@ var (
 		{Name: "date", Type: field.TypeInt},
 		{Name: "start_time", Type: field.TypeInt},
 		{Name: "end_time", Type: field.TypeInt},
-		{Name: "meeting_mdrs", Type: field.TypeInt, Nullable: true},
+		{Name: "meeting_mdrs", Type: field.TypeInt64, Nullable: true},
 		{Name: "room_mdrs", Type: field.TypeInt, Nullable: true},
 	}
 	// MeetingDateRoomsTable holds the schema information for the "meeting_date_rooms" table.

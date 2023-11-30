@@ -452,8 +452,8 @@ func (mdrq *MeetingDateRoomQuery) sqlAll(ctx context.Context, hooks ...queryHook
 }
 
 func (mdrq *MeetingDateRoomQuery) loadMeeting(ctx context.Context, query *MeetingQuery, nodes []*MeetingDateRoom, init func(*MeetingDateRoom), assign func(*MeetingDateRoom, *Meeting)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*MeetingDateRoom)
+	ids := make([]int64, 0, len(nodes))
+	nodeids := make(map[int64][]*MeetingDateRoom)
 	for i := range nodes {
 		if nodes[i].meeting_mdrs == nil {
 			continue
