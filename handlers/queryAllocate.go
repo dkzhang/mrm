@@ -23,14 +23,14 @@ func (h *Handler) QueryAllocateByDate(c *gin.Context) {
 	meetingDateStr := c.Param("date")
 	meetingDate, err := strconv.Atoi(meetingDateStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	mdrs, err := h.DbClient.MeetingDateRoom.Query().
 		Where(meetingdateroom.Date(meetingDate)).WithRoom().WithMeeting().All(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -60,24 +60,24 @@ func (h *Handler) QueryAllocateByRoom(c *gin.Context) {
 	// convert string to int
 	roomID, err := strconv.Atoi(roomIdStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "roomID convert to int error: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "roomID convert to int error: " + err.Error()})
 		return
 	}
 	from, err := strconv.Atoi(fromStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "<from> convert to int error: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "<from> convert to int error: " + err.Error()})
 		return
 	}
 	to, err := strconv.Atoi(toStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "<to> convert to int error: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "<to> convert to int error: " + err.Error()})
 		return
 	}
 
 	// query in db
 	mdrs, err := h.DbClient.Room.Query().Where(room.ID(roomID)).QueryMdrs().WithRoom().WithMeeting().All(c)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
 

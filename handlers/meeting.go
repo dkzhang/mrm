@@ -30,7 +30,7 @@ func (h *Handler) QueryMeeting(c *gin.Context) {
 	meetingIdStr := c.Param("id")
 	meetingId, err := strconv.Atoi(meetingIdStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "MeetingID convert to int error: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "MeetingID convert to int error: " + err.Error()})
 		return
 	}
 
@@ -38,7 +38,7 @@ func (h *Handler) QueryMeeting(c *gin.Context) {
 		Where(meetingdateroom.HasMeetingWith(meeting.ID(meetingId))).
 		WithRoom().WithMeeting().All(c)
 	if err != nil || len(mdrs) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Query error: " + err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"message": "Query error: " + err.Error()})
 		return
 	}
 
@@ -65,7 +65,7 @@ func (h *Handler) DeleteMeeting(c *gin.Context) {
 	meetingIdStr := c.Param("id")
 	meetingId, err := strconv.Atoi(meetingIdStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "MeetingID convert to int error: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "MeetingID convert to int error: " + err.Error()})
 		return
 	}
 
@@ -78,25 +78,25 @@ func (h *Handler) deleteMeeting(meetingId int, c *gin.Context) (code int, obj an
 	// Delete Meeting and MeetingDateRoom
 	tx, err := h.DbClient.Tx(c)
 	if err != nil {
-		return http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Tx error: %s", err.Error())}
+		return http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Tx error: %s", err.Error())}
 	}
 
 	// delete meetingDateRoom
 	_, err = tx.MeetingDateRoom.Delete().Where(meetingdateroom.HasMeetingWith(meeting.ID(meetingId))).Exec(c)
 	if err != nil {
-		return http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Delete meetingDateRoom error: %v", err)}
+		return http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Delete meetingDateRoom error: %v", err)}
 	}
 
 	// delete meeting
 	_, err = tx.Meeting.Delete().Where(meeting.ID(meetingId)).Exec(c)
 	if err != nil {
-		return http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Delete meeting error: %v", err)}
+		return http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Delete meeting error: %v", err)}
 	}
 
 	// commit
 	err = tx.Commit()
 	if err != nil {
-		return http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Commit error: %v", err)}
+		return http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Commit error: %v", err)}
 	}
 	return http.StatusOK, gin.H{"message": "Delete success"}
 }

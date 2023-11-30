@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	tencentCls "github.com/tencentcloud/tencentcloud-cls-sdk-go"
 	"log"
 	"mrm/ent"
 	"mrm/handlers"
@@ -18,9 +19,24 @@ func main() {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbDatabase := os.Getenv("DB_NAME")
 
+	producerConfig := tencentCls.GetDefaultAsyncProducerClientConfig()
+	producerConfig.Endpoint = "ap-guangzhou.cls.tencentcs.com"
+	producerConfig.AccessKeyID = ""
+	producerConfig.AccessKeySecret = ""
+
+	producerInstance, err := tencentCls.NewAsyncProducerClient(producerConfig)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// 异步发送程序，需要启动
+	producerInstance.Start()
+	defer producerInstance.Close(60000)
+
 	// try to open database 3 times
 	var client *ent.Client
-	var err error
+	//var err error
 	count := 0
 	for {
 		client, err = ent.Open("postgres",
@@ -63,4 +79,28 @@ func main() {
 	r.DELETE("/meeting/:id", handler.DeleteMeeting)
 
 	r.Run(":8080")
+}
+
+type LogInstance struct {
+	producerInstance *tencentCls.AsyncProducerClient
+	TopicId          string
+}
+
+type Callback struct {
+}
+
+func (callback *Callback) Success(result *tencentCls.Result) {
+	attemptList := result.GetReservedAttempts()
+	for _, attempt := range attemptList {
+		fmt.Printf("%+v \n", attempt)
+	}
+}
+
+func (callback *Callback) Fail(result *tencentCls.Result) {
+	fmt.Println(result.IsSuccessful())
+	fmt.Println(result.GetErrorCode())
+	fmt.Println(result.GetErrorMessage())
+	fmt.Println(result.GetReservedAttempts())
+	fmt.Println(result.GetRequestId())
+	fmt.Println(result.GetTimeStampMs())
 }

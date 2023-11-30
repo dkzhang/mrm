@@ -11,7 +11,7 @@ import (
 func (h *Handler) GetRooms(c *gin.Context) {
 	rooms, err := h.DbClient.Room.Query().Order(ent.Asc(room.FieldID)).All(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, rooms)
@@ -20,7 +20,7 @@ func (h *Handler) GetRooms(c *gin.Context) {
 func (h *Handler) CreateRoom(c *gin.Context) {
 	room := ent.Room{}
 	if err := c.ShouldBindJSON(&room); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -28,7 +28,7 @@ func (h *Handler) CreateRoom(c *gin.Context) {
 		var err error
 		room.ID, err = h.DbClient.Room.Query().Aggregate(ent.Max("id")).Int(c)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
 		room.ID += 1
@@ -39,7 +39,7 @@ func (h *Handler) CreateRoom(c *gin.Context) {
 		SetName(room.Name).
 		Save(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, newRoom)
@@ -50,20 +50,20 @@ func (h *Handler) UpdateRoom(c *gin.Context) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	room := ent.Room{}
 	if err := c.ShouldBindJSON(&room); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 	updatedRoom, err := h.DbClient.Room.UpdateOneID(id).
 		SetName(room.Name).
 		Save(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, updatedRoom)
@@ -74,12 +74,12 @@ func (h *Handler) DeleteRoom(c *gin.Context) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	if err := h.DbClient.Room.DeleteOneID(id).Exec(c); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "success"})

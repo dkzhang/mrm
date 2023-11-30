@@ -37,14 +37,14 @@ func (h *Handler) SVG(c *gin.Context) {
 	meetingDateStr := c.Param("date")
 	meetingDate, err := strconv.Atoi(meetingDateStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	mdrs, err := h.DbClient.MeetingDateRoom.Query().
 		Where(meetingdateroom.Date(meetingDate)).WithRoom().WithMeeting().All(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
