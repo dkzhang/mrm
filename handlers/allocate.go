@@ -5,8 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"mrm/ent"
 	"mrm/ent/meeting"
+	"mrm/ent/meetingdateroom"
 	"mrm/ent/room"
 	"net/http"
+	"time"
 )
 
 type AllocateMeeting struct {
@@ -35,31 +37,61 @@ func (h *Handler) Allocate(c *gin.Context) {
 	}
 
 	// Check DateTimes []MeetingDateTime is valid
-
-	// removing meeting if exists.
-	_, err := h.DbClient.Meeting.Query().Where(meeting.ID(am.ID)).Only(c)
-	if err == nil {
-		// meeting exists, remove it.
-		code, obj := h.deleteMeeting(am.ID, c)
-		if code != http.StatusOK {
-			c.JSON(code, obj)
+	for _, dt := range am.DateTimes {
+		dateStr := fmt.Sprintf("%d", dt.Date)
+		_, err := time.Parse("20060102", dateStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "MeetingDateTime Date is not in YYYYMMDD integer format"})
 			return
 		}
-	} else {
-		// check if error is not found.
-		if !ent.IsNotFound(err) {
-			c.JSON(http.StatusInternalServerError,
-				gin.H{"error": fmt.Sprintf("query Meeting error: %s", err.Error())})
+
+		if dt.StartTime >= dt.EndTime {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "MeetingDateTime StartTime >= EndTime"})
+			return
+		}
+		if dt.StartTime < 0 || dt.StartTime > 2400 || dt.EndTime < 0 || dt.EndTime > 2400 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "MeetingDateTime StartTime or EndTime is not in [0, 2400]"})
 			return
 		}
 	}
 
+	// create tx
+	tx, err := h.DbClient.Tx(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Tx error: %s", err.Error())})
+	}
+
+	// check meeting exists
+	_, err = tx.Meeting.Query().Where(meeting.ID(am.ID)).Only(c)
+	if err != nil {
+		if !ent.IsNotFound(err) {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Query meeting error: %v", err)})
+			return
+		}
+	} else {
+		// meeting exists, delete it.
+		// delete meetingDateRoom
+		_, err = tx.MeetingDateRoom.Delete().Where(meetingdateroom.HasMeetingWith(meeting.ID(am.ID))).Exec(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Delete meetingDateRoom error: %v", err)})
+		}
+
+		// delete meeting
+		_, err = tx.Meeting.Delete().Where(meeting.ID(am.ID)).Exec(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Delete meeting error: %v", err)})
+		}
+	}
+
+	// do not commit the transaction here.
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// DateTime conflict detection
 	var conflictedMdrs []*ent.MeetingDateRoom
 	for _, dt := range am.DateTimes {
 		mdrs, err := h.DbClient.Room.Query().Where(room.ID(dt.RoomID)).QueryMdrs().All(c)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Query mdrs error: %s", err.Error())})
 			return
 		}
 
@@ -68,18 +100,11 @@ func (h *Handler) Allocate(c *gin.Context) {
 				if am.IsMandatory {
 					conflictedMdrs = append(conflictedMdrs, mdr)
 				} else {
-					c.JSON(http.StatusConflict, gin.H{"error": "DateTime Conflict"})
+					c.JSON(http.StatusConflict, gin.H{"error": "Meeting DateTime Conflict"})
 					return
 				}
 			}
 		}
-	}
-
-	// Create Meeting and MeetingDateRoom
-	tx, err := h.DbClient.Tx(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
 	}
 
 	// create meeting.
