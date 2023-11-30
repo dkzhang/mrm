@@ -98,7 +98,12 @@ func (h *Handler) Allocate(c *gin.Context) {
 
 		for _, mdr := range mdrs {
 			// continue if in the same meeting.
-			if mdr.Edges.Meeting.ID == am.ID {
+			m, err := mdr.QueryMeeting().Only(c)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Query meeting ID from mdr error: %s", err.Error())})
+				return
+			}
+			if m.ID == am.ID {
 				continue
 			}
 

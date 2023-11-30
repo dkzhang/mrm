@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	tencentCls "github.com/tencentcloud/tencentcloud-cls-sdk-go"
 	"log"
 	"mrm/ent"
 	"mrm/handlers"
 	"os"
-	"time"
 )
 
 func main() {
@@ -34,25 +32,11 @@ func main() {
 	//producerInstance.Start()
 	//defer producerInstance.Close(60000)
 
-	// try to open database 3 times
-	var client *ent.Client
-	var err error
-	count := 0
-	for {
-		client, err = ent.Open("postgres",
-			fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbUser, dbPassword, dbDatabase))
-		//"host=192.168.128.27 port=5432 user=postgres dbname=mydatabase password=mysecretpassword sslmode=disable")
-		if err != nil {
-			if count >= 3 {
-				log.Fatalf("failed opening connection to postgres after 3 times try: %v", err)
-			} else {
-				count += 1
-				log.Printf("failed opening connection to postgres, trying %d", count)
-				time.Sleep(time.Second * 3)
-			}
-		} else {
-			break
-		}
+	client, err := ent.Open("postgres",
+		fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbUser, dbPassword, dbDatabase))
+	//"host=192.168.128.27 port=5432 user=postgres dbname=mydatabase password=mysecretpassword sslmode=disable")
+	if err != nil {
+		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
 	defer client.Close()
 
@@ -81,32 +65,32 @@ func main() {
 	r.Run(":8080")
 }
 
-type LogInstance struct {
-	producerInstance *tencentCls.AsyncProducerClient
-	TopicId          string
-}
-
-//func (logInstance *LogInstance) SendLog(messages map[string]string) error {
-//	log := tencentCls.NewCLSLog(time.Now().Unix(), messages)
-//
-//	return logInstance.producerInstance.SendLog(logInstance.TopicId, log, callback)
+//type LogInstance struct {
+//	producerInstance *tencentCls.AsyncProducerClient
+//	TopicId          string
 //}
-
-type Callback struct {
-}
-
-func (callback *Callback) Success(result *tencentCls.Result) {
-	attemptList := result.GetReservedAttempts()
-	for _, attempt := range attemptList {
-		fmt.Printf("%+v \n", attempt)
-	}
-}
-
-func (callback *Callback) Fail(result *tencentCls.Result) {
-	fmt.Println(result.IsSuccessful())
-	fmt.Println(result.GetErrorCode())
-	fmt.Println(result.GetErrorMessage())
-	fmt.Println(result.GetReservedAttempts())
-	fmt.Println(result.GetRequestId())
-	fmt.Println(result.GetTimeStampMs())
-}
+//
+////func (logInstance *LogInstance) SendLog(messages map[string]string) error {
+////	log := tencentCls.NewCLSLog(time.Now().Unix(), messages)
+////
+////	return logInstance.producerInstance.SendLog(logInstance.TopicId, log, callback)
+////}
+//
+//type Callback struct {
+//}
+//
+//func (callback *Callback) Success(result *tencentCls.Result) {
+//	attemptList := result.GetReservedAttempts()
+//	for _, attempt := range attemptList {
+//		fmt.Printf("%+v \n", attempt)
+//	}
+//}
+//
+//func (callback *Callback) Fail(result *tencentCls.Result) {
+//	fmt.Println(result.IsSuccessful())
+//	fmt.Println(result.GetErrorCode())
+//	fmt.Println(result.GetErrorMessage())
+//	fmt.Println(result.GetReservedAttempts())
+//	fmt.Println(result.GetRequestId())
+//	fmt.Println(result.GetTimeStampMs())
+//}
