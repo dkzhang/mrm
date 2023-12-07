@@ -154,9 +154,6 @@ func GenSvg(svgTitle string, rooms []roomOccupiedArray, meetings map[int64]Meeti
 	// SVG END
 	buffer.WriteString(SVG_END)
 
-	// Write Js
-	buffer.WriteString(GetJs())
-
 	return buffer
 }
 
