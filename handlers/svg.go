@@ -188,5 +188,5 @@ func mergeArray(a []int64, b []int64) []int64 {
 	return array
 }
 
-const SVG_HEAD = `<svg preserveAspectRatio="xMinYMim meet" viewBox="0 0 %d %d" width="%d" height="%d"   xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">`
+const SVG_HEAD = `<svg id="mySvg" preserveAspectRatio="xMinYMim meet" viewBox="0 0 %d %d" width="%d" height="%d"   xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">`
 const SVG_END = `</svg>`
