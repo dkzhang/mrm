@@ -33,6 +33,11 @@ const (
 	colorsNum = 16
 )
 
+type Meeting struct {
+	Name      string
+	Applicant string
+}
+
 func (h *Handler) SVG(c *gin.Context) {
 	meetingDateStr := c.Param("date")
 	meetingDate, err := strconv.Atoi(meetingDateStr)
@@ -57,20 +62,28 @@ func (h *Handler) SVG(c *gin.Context) {
 		roomOccupiedArrays[i].Occupied = make([]int64, Intervals)
 	}
 
+	meetings := make(map[int64]Meeting)
+
 	for _, mdr := range mdrs {
 		for i, room := range rooms {
 			if room.ID == mdr.Edges.Room.ID {
 				roomOccupiedArrays[i].Occupied = mergeArray(roomOccupiedArrays[i].Occupied, t2t(mdr.StartTime, mdr.EndTime, mdr.Edges.Meeting.ID))
+				if _, ok := meetings[mdr.Edges.Meeting.ID]; !ok {
+					meetings[mdr.Edges.Meeting.ID] = Meeting{
+						Name:      mdr.Edges.Meeting.Name,
+						Applicant: mdr.Edges.Meeting.Applicant,
+					}
+				}
 			}
 		}
 	}
 
 	svgTitle := fmt.Sprintf("%d年%d月%d日会议室占用情况", meetingDate/10000, meetingDate%10000/100, meetingDate%100)
-	buffer := GenSvg(svgTitle, roomOccupiedArrays)
+	buffer := GenSvg(svgTitle, roomOccupiedArrays, meetings)
 	c.Data(http.StatusOK, "image/svg+xml", buffer.Bytes())
 }
 
-func GenSvg(svgTitle string, rooms []roomOccupiedArray) *bytes.Buffer {
+func GenSvg(svgTitle string, rooms []roomOccupiedArray, meetings map[int64]Meeting) *bytes.Buffer {
 	tableHeight := titleHeight + colHeaderHeight + cellHeight*len(rooms) + tableSpacingY*2
 
 	buffer := bytes.NewBufferString(fmt.Sprintf(SVG_HEAD, tableWidth, tableHeight, tableWidth, tableHeight))
@@ -87,7 +100,8 @@ func GenSvg(svgTitle string, rooms []roomOccupiedArray) *bytes.Buffer {
 	for i := 0; i < Intervals/IntervalsPerHour; i++ {
 		buffer.WriteString(fmt.Sprintf(`<rect x="%d" y="%d" width="%d" height="%d" class="header col-header" />`+"\n",
 			currentX+colHeaderWidth*i, currentY,
-			colHeaderWidth, colHeaderHeight))
+			colHeaderWidth, colHeaderHeight,
+		))
 		buffer.WriteString(fmt.Sprintf(`<text x="%d" y="%d" class="header-text col-header-text">%d</text>`+"\n",
 			currentX+colHeaderWidth*i+colHeaderWidth/2, currentY+colHeaderHeight/2, startHour+i))
 	}
@@ -116,9 +130,11 @@ func GenSvg(svgTitle string, rooms []roomOccupiedArray) *bytes.Buffer {
 					// change color
 					currentColorIndex = (currentColorIndex + 1) % colorsNum
 				}
-				buffer.WriteString(fmt.Sprintf(`<rect x="%d" y="%d" width="%d" height="%d" class="cell cell-occupied color-fill-%d" />`+"\n",
+				buffer.WriteString(fmt.Sprintf(`<rect x="%d" y="%d" width="%d" height="%d" data-name="%s" data-applicant="%s" class="cell cell-occupied color-fill-%d" />`+"\n",
 					currentX+cellWidth*j, currentY+cellHeight*i,
-					cellWidth, cellHeight, currentColorIndex))
+					cellWidth, cellHeight,
+					meetings[room.Occupied[j]].Name, meetings[room.Occupied[j]].Applicant,
+					currentColorIndex))
 			} else {
 				buffer.WriteString(fmt.Sprintf(`<rect x="%d" y="%d" width="%d" height="%d" class="cell cell-idle"/>`+"\n",
 					currentX+cellWidth*j, currentY+cellHeight*i,
@@ -128,8 +144,18 @@ func GenSvg(svgTitle string, rooms []roomOccupiedArray) *bytes.Buffer {
 		}
 	}
 
+	// insert newRect
+	buffer.WriteString(`
+	<rect id="newRect" x="0" y="0" width="100" height="50" style="fill:yellow; visibility:hidden"/>
+    <text id="textName" x="0" y="0" visibility="hidden"></text>
+    <text id="textApplicant" text-anchor="middle" x="0" y="0" visibility="hidden"></text>
+`)
+
 	// SVG END
 	buffer.WriteString(SVG_END)
+
+	// Write Js
+	buffer.WriteString(GetJs())
 
 	return buffer
 }

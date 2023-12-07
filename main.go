@@ -17,21 +17,6 @@ func main() {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbDatabase := os.Getenv("DB_NAME")
 
-	//producerConfig := tencentCls.GetDefaultAsyncProducerClientConfig()
-	//producerConfig.Endpoint = "ap-guangzhou.cls.tencentcs.com"
-	//producerConfig.AccessKeyID = ""
-	//producerConfig.AccessKeySecret = ""
-	//
-	//producerInstance, err := tencentCls.NewAsyncProducerClient(producerConfig)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//
-	//// 异步发送程序，需要启动
-	//producerInstance.Start()
-	//defer producerInstance.Close(60000)
-
 	client, err := ent.Open("postgres",
 		fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbUser, dbPassword, dbDatabase))
 	//"host=192.168.128.27 port=5432 user=postgres dbname=mydatabase password=mysecretpassword sslmode=disable")
@@ -64,33 +49,3 @@ func main() {
 
 	r.Run(":8080")
 }
-
-//type LogInstance struct {
-//	producerInstance *tencentCls.AsyncProducerClient
-//	TopicId          string
-//}
-//
-////func (logInstance *LogInstance) SendLog(messages map[string]string) error {
-////	log := tencentCls.NewCLSLog(time.Now().Unix(), messages)
-////
-////	return logInstance.producerInstance.SendLog(logInstance.TopicId, log, callback)
-////}
-//
-//type Callback struct {
-//}
-//
-//func (callback *Callback) Success(result *tencentCls.Result) {
-//	attemptList := result.GetReservedAttempts()
-//	for _, attempt := range attemptList {
-//		fmt.Printf("%+v \n", attempt)
-//	}
-//}
-//
-//func (callback *Callback) Fail(result *tencentCls.Result) {
-//	fmt.Println(result.IsSuccessful())
-//	fmt.Println(result.GetErrorCode())
-//	fmt.Println(result.GetErrorMessage())
-//	fmt.Println(result.GetReservedAttempts())
-//	fmt.Println(result.GetRequestId())
-//	fmt.Println(result.GetTimeStampMs())
-//}
