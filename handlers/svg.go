@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	Intervals        = 24
+	Intervals        = 26
 	IntervalsPerHour = 2
 
 	cellWidth       = 30
@@ -28,7 +28,7 @@ const (
 
 	tableWidth = rowHeaderWidth + cellWidth*Intervals + tableSpacingX*2
 
-	startHour = 7
+	startHour = 8
 
 	colorsNum = 16
 )
@@ -164,8 +164,8 @@ type roomOccupiedArray struct {
 }
 
 func t2i(t int) int {
-	// Convert time 700 to 0, 730 to 1, like this
-	return t/100*2 + t%100/30 - 7*2
+	// Convert time 800 to 0, 830 to 1, like this
+	return t/100*2 + t%100/30 - startHour*2
 }
 
 func t2t(from int, to int, id int64) []int64 {
